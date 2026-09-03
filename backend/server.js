@@ -135,13 +135,33 @@ wss.on("connection", (ws) => {
   ws.send(JSON.stringify({ type: "snapshot", robots: state.snapshot() }));
 
   ws.on("message", (buf) => {
-    let msg;
-    try {
-      msg = JSON.parse(buf.toString());
-    } catch {
-      return; // not JSON — ignore
-    }
-    if (!msg || typeof msg !== "object" || !msg.robot_id) return; // not a report
+  let msg;
+
+  try {
+    msg = JSON.parse(buf.toString());
+  } catch {
+    return;
+  }
+
+  // Simulator reports its current fleet size.
+  if (msg?.type === "simulator_config" && Number.isInteger(msg.fleetSize)) {
+    state.setFleetSize(msg.fleetSize);
+
+    sendToAll({
+      type: "config",
+      fleetSize: msg.fleetSize,
+    });
+
+    sendToAll({
+      type: "snapshot",
+      robots: state.snapshot(),
+    });
+
+    return;
+  }
+
+  if (!msg || typeof msg !== "object" || !msg.robot_id) return;
+
 
     const { robot, ignored } = state.ingest(msg, ws.sessionId);
     if (!ignored) markDirty(robot);
