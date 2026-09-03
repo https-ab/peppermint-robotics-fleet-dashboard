@@ -10,8 +10,8 @@ Built as the SDE-1 (full stack) hiring-challenge response for Peppermint Robotic
 
 ## Live system
 
-- Dashboard: `https://<to-be-filled>`
-- Backend surface consumed by the dashboard: `https://<to-be-filled>/ws/robots` (WS) and `https://<to-be-filled>/api/robots` (REST)
+- Dashboard: `https://peppermint-robotics-fleet-dashboard-2.onrender.com/`
+- Backend surface consumed by the dashboard: `https://peppermint-robotics-fleet-dashboard-1.onrender.com` (WS) and `https://peppermint-robotics-fleet-dashboard-1.onrender.com/api/robots` (REST)
 
 ## What's in the box
 
