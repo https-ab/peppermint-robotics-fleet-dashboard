@@ -1,19 +1,14 @@
-
-
 export class FleetState {
   constructor({ staleAfterMs = 5000, knownTypes = {} } = {}) {
     this.robots = new Map(); // robot_id -> { ...report, type, lastSeen }
     this.staleAfterMs = staleAfterMs;
-    
     this.knownTypes = knownTypes;
   }
-
 
   ingest(report, session) {
     const prev = this.robots.get(report.robot_id);
 
     if (prev && prev.session === session) {
-  
       if (
         typeof report.t === "number" &&
         typeof prev.t === "number" &&
@@ -22,7 +17,6 @@ export class FleetState {
         return { robot: prev, ignored: true };
       }
     }
- 
 
     const robot = {
       ...report,
@@ -30,18 +24,37 @@ export class FleetState {
       lastSeen: Date.now(),
       session,
     };
+
     this.robots.set(report.robot_id, robot);
+
     return { robot, ignored: false };
+  }
+
+  setFleetSize(size) {
+    const removed = [];
+
+    for (const [id, robot] of this.robots.entries()) {
+      const match = id.match(/^r(\d+)$/);
+
+      if (match && Number(match[1]) > size) {
+        this.robots.delete(id);
+        removed.push(robot);
+      }
+    }
+
+    return removed;
   }
 
   checkStale(staleAfterMs = this.staleAfterMs, now = Date.now()) {
     const changed = [];
+
     for (const r of this.robots.values()) {
       if (r.status !== "offline" && now - r.lastSeen > staleAfterMs) {
         r.status = "offline";
         changed.push(r);
       }
     }
+
     return changed;
   }
 
@@ -49,7 +62,6 @@ export class FleetState {
     return this.robots.get(id) || null;
   }
 
-  
   snapshot() {
     return [...this.robots.values()];
   }
