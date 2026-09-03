@@ -1,5 +1,3 @@
-
-
 // Small helper: read a positive integer from an env var, with a fallback.
 export function intFromEnv(name, fallback) {
   const n = parseInt(process.env[name] || "", 10);
@@ -7,19 +5,16 @@ export function intFromEnv(name, fallback) {
 }
 
 export const config = {
-  // Port for REST + WebSocket.
+  // Render provides PORT automatically.
+  // Locally, this falls back to 3001.
   port: intFromEnv("PORT", 3001),
 
-  
   controlToken: process.env.CONTROL_TOKEN || "dev-token-change-me",
-
 
   staleAfterMs: intFromEnv("STALE_AFTER_MS", 5000),
 
-
   broadcastBatchMs: intFromEnv("BROADCAST_BATCH_MS", 50),
 };
-
 
 export const CONTROL_LIMITS = {
   fleetSize: { min: 1, max: 2000 },
