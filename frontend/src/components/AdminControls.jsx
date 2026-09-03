@@ -51,7 +51,7 @@ export default function AdminControls() {
     <div className="border border-slate-800 rounded-lg p-3">
       <h2 className="text-sm font-medium">Live controls</h2>
       <p className="text-xs text-slate-500 mb-3">
-        Changes the running fleet immediately — no redeploy. Leave a
+        Changes the running fleet immediately, no redeploy. Leave a
         field empty to keep that setting.
       </p>
 
