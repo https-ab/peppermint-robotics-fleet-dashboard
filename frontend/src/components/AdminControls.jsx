@@ -1,32 +1,51 @@
-
-
 import { useEffect, useState } from "react";
+
+const API_URL = import.meta.env.VITE_API_URL;
 
 export default function AdminControls() {
   const [token, setToken] = useState("");
   const [fleetSize, setFleetSize] = useState("");
   const [updateIntervalMs, setUpdateIntervalMs] = useState("");
-  const [status, setStatus] = useState(null); 
+  const [status, setStatus] = useState(null);
 
- 
   useEffect(() => {
-    fetch("/api/config")
-      .then((r) => r.json())
+    fetch(`${API_URL}/api/config`)
+      .then(async (r) => {
+        const data = await r.json();
+
+        if (!r.ok) {
+          throw new Error(data.error || `HTTP ${r.status}`);
+        }
+
+        return data;
+      })
       .then((c) => {
         setFleetSize(c.fleetSize);
         setUpdateIntervalMs(c.updateIntervalMs);
       })
-      .catch(() => {});
+      .catch((e) => {
+        console.error("Failed to load config:", e);
+        setStatus({
+          ok: false,
+          msg: `Failed to load config: ${e.message}`,
+        });
+      });
   }, []);
 
   function apply() {
     setStatus(null);
-    
-    const body = {};
-    if (fleetSize !== "") body.fleetSize = Number(fleetSize);
-    if (updateIntervalMs !== "") body.updateIntervalMs = Number(updateIntervalMs);
 
-    fetch("/api/config", {
+    const body = {};
+
+    if (fleetSize !== "") {
+      body.fleetSize = Number(fleetSize);
+    }
+
+    if (updateIntervalMs !== "") {
+      body.updateIntervalMs = Number(updateIntervalMs);
+    }
+
+    fetch(`${API_URL}/api/config`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -36,20 +55,31 @@ export default function AdminControls() {
     })
       .then(async (r) => {
         const data = await r.json();
-        if (!r.ok) throw new Error(data.error || `HTTP ${r.status}`);
+
+        if (!r.ok) {
+          throw new Error(data.error || `HTTP ${r.status}`);
+        }
+
         setFleetSize(data.config.fleetSize);
         setUpdateIntervalMs(data.config.updateIntervalMs);
+
         setStatus({
           ok: true,
           msg: `applied: ${data.config.fleetSize} robots, every ${data.config.updateIntervalMs}ms`,
         });
       })
-      .catch((e) => setStatus({ ok: false, msg: e.message }));
+      .catch((e) => {
+        setStatus({
+          ok: false,
+          msg: e.message,
+        });
+      });
   }
 
   return (
     <div className="border border-slate-800 rounded-lg p-3">
       <h2 className="text-sm font-medium">Live controls</h2>
+
       <p className="text-xs text-slate-500 mb-3">
         Changes the running fleet immediately, no redeploy. Leave a
         field empty to keep that setting.
@@ -75,6 +105,7 @@ export default function AdminControls() {
             className="w-16 px-2 py-1 rounded border border-slate-700 bg-slate-900 focus:outline-none focus:border-slate-500"
           />
         </label>
+
         <label className="flex items-center gap-1.5 text-xs text-slate-400">
           every (ms)
           <input
@@ -87,6 +118,7 @@ export default function AdminControls() {
             className="w-16 px-2 py-1 rounded border border-slate-700 bg-slate-900 focus:outline-none focus:border-slate-500"
           />
         </label>
+
         <button
           onClick={apply}
           className="text-xs px-3 py-1.5 rounded bg-slate-200 text-slate-900 hover:bg-white"
