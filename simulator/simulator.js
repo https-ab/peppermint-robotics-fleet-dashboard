@@ -81,9 +81,25 @@ function robotFromRoster(i) {
 
 function applyFleetSize(size) {
   FLEET_SIZE = size;
-  while (robots.length < FLEET_SIZE) robots.push(robotFromRoster(robots.length));
-  if (robots.length > FLEET_SIZE) robots.length = FLEET_SIZE;
+
+  while (robots.length < FLEET_SIZE) {
+    robots.push(robotFromRoster(robots.length));
+  }
+
+  if (robots.length > FLEET_SIZE) {
+    robots.length = FLEET_SIZE;
+  }
+
+  if (ws && ws.readyState === WebSocket.OPEN) {
+    ws.send(
+      JSON.stringify({
+        type: "simulator_config",
+        fleetSize: FLEET_SIZE,
+      })
+    );
+  }
 }
+
 
 
 function nextStatus(r) {
